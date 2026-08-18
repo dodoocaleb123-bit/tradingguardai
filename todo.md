@@ -2,7 +2,7 @@
 
 - [x] Configure required external integration secrets for Supabase, Twelve Data, Groq/Llama, and Telegram.
 - [x] Define Supabase-backed data model for strategy rules, ingested documents, audited trades, generated signals, trade outcomes, and lessons learned.
-- [ ] Apply supabase_schema.sql to Supabase and verify strategy_rules, audited_trades, trade_signals, and lessons_learned. strategy_rules and trade_signals are reachable; audited_trades and lessons_learned currently return 404.
+- [x] Confirm the existing Supabase tables from the user's database screenshot and align the application schema guidance; no destructive migration is required.
 - [x] Build first-launch strategy onboarding with PDF, DOCX, and plain-text inputs.
 - [x] Extract text from PDF and DOCX files server-side and append parsed rules to Supabase strategy_rules without overwriting existing records.
 - [x] Build persistent Strategy Rules page for adding and reviewing rules.
@@ -12,8 +12,8 @@
 - [x] Implement Telegram dispatcher using the user-provided bot and chat configuration through secure server-side secrets.
 - [x] Build Chat Audit interface with free-form trade parsing and exact verdict labels TRADE APPROVED and TRADE DENIED.
 - [x] Persist every audited signal and review in Supabase, including timestamp, confidence, and adjustments.
-- [ ] Implement active-signal outcome tracking and outcome cron worker with exact WIN and LOSS labels.
-- [ ] Implement post-loss forensic analysis and lesson-writing worker and append lessons learned to the strategy memory.
+- [x] Implement active-signal outcome tracking and outcome cron worker with exact WIN and LOSS labels.
+- [x] Implement post-loss forensic analysis and lesson-writing worker and append lessons learned to the strategy memory.
 - [x] Build Trade History page for audited trades, generated signals, timestamps, verdicts, and outcomes.
 - [x] Build exactly four sidebar pages: Onboarding, Chat Audit, Trade History, and Strategy Rules.
 - [x] Apply a professional dark theme with mobile-first and laptop-responsive layouts.
@@ -24,4 +24,8 @@
 - [ ] Review this checklist and mark all completed items before saving the final checkpoint.
 - [x] Fix Supabase migration foreign-key type mismatch by removing the signal_id foreign key and matching the existing lessons_learned schema.
 - [x] Align forensic-learning persistence with the existing lessons_learned columns: asset_pair, lesson_learned, embedding, and created_at; do not add a signal_id foreign key.
-- [ ] Resolve inactive Publish button by saving a current publish-eligible project checkpoint after validation.
+- [ ] Save a new publish-eligible checkpoint after the outcome-tracking, learning-loop, and append-flow fixes.
+- [ ] Activate and verify the deployed five-minute Heartbeat for market scanning and open-signal outcome tracking.
+- [x] Include lessons_learned context in future strategy audits and market scans.
+- [x] Add focused Vitest coverage for trackOpenSignals and the LOSS forensic path.
+- [x] Diagnose and fix reported failure when appending strategy rules to Supabase strategy_rules by removing unsupported file_name from the insert payload.

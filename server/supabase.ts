@@ -37,3 +37,7 @@ export async function supabaseInsert<T = SupabaseRow[]>(table: string, rows: Sup
 export async function supabaseSelect<T = SupabaseRow[]>(table: string, query = "select=*&order=created_at.desc") {
   return supabaseRequest<T>(table, { query });
 }
+
+export async function supabaseUpdate<T = SupabaseRow[]>(table: string, query: string, body: SupabaseRow) {
+  return supabaseRequest<T>(table, { method: "PATCH", query, body });
+}

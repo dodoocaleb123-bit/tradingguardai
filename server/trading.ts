@@ -1,6 +1,6 @@
 import mammoth from "mammoth";
 import { PDFParse } from "pdf-parse";
-import { supabaseInsert, supabaseSelect } from "./supabase";
+import { supabaseInsert, supabaseSelect, supabaseUpdate } from "./supabase";
 
 export const ASSETS = ["EUR/USD", "XAU/USD", "GBP/USD", "BTC/USD"] as const;
 export const TIMEFRAMES = ["15min", "1h"] as const;
@@ -100,12 +100,17 @@ export async function sendTelegram(text: string) {
 }
 
 export async function loadRules() {
-  const rows = await supabaseSelect<Array<{ rule_text?: string; content?: string; text?: string }>>("strategy_rules", "select=*&order=created_at.desc");
-  return rows.map(row => row.rule_text ?? row.content ?? row.text ?? "").filter(Boolean).join("\n\n");
+  const [rows, lessons] = await Promise.all([
+    supabaseSelect<Array<{ rule_text?: string; content?: string; text?: string }>>("strategy_rules", "select=*&order=created_at.desc"),
+    supabaseSelect<Array<{ asset_pair?: string; lesson_learned?: string }>>("lessons_learned", "select=asset_pair,lesson_learned&order=created_at.desc&limit=50").catch(() => []),
+  ]);
+  const rulesText = rows.map(row => row.rule_text ?? row.content ?? row.text ?? "").filter(Boolean);
+  const lessonsText = lessons.map(row => row.lesson_learned ? `Lesson learned (${row.asset_pair ?? "market"}): ${row.lesson_learned}` : "").filter(Boolean);
+  return [...rulesText, ...lessonsText].join("\n\n");
 }
 
 export async function saveRule(source: string, content: string, fileName?: string) {
-  return supabaseInsert("strategy_rules", { source, content, rule_text: content, file_name: fileName ?? null, created_at: new Date().toISOString() });
+  return supabaseInsert("strategy_rules", { source, content, rule_text: content, created_at: new Date().toISOString() });
 }
 
 export async function saveLesson(assetPair: string, lesson: string, embedding?: number[]) {
@@ -116,9 +121,44 @@ export async function saveLesson(assetPair: string, lesson: string, embedding?: 
   return supabaseInsert("lessons_learned", row);
 }
 
-export async function scanMarketCycle() {
+async function analyzeLoss(signal: Record<string, unknown>, market: Array<Record<string, string>>, rules: string) {
+  return groqCompletion([
+    { role: "system", content: "You are a trading risk forensic analyst. Return JSON with one concise lesson string explaining the likely failure and one guardrail string to add to the strategy memory. Do not promise future profits." },
+    { role: "user", content: JSON.stringify({ signal, market, rules }) },
+  ]);
+}
+
+export async function trackOpenSignals() {
+  const openSignals = await supabaseSelect<Array<Record<string, unknown>>>("trade_signals", "select=*&status=eq.OPEN&order=created_at.asc&limit=100");
   const rules = await loadRules();
-  if (!rules.trim()) return { scanned: 0, signals: 0, skipped: "No strategy rules have been ingested" };
+  let closed = 0;
+  for (const signal of openSignals) {
+    if (!signal.id || !signal.asset || !signal.direction) continue;
+    const candles = await fetchMarketData(String(signal.asset), String(signal.timeframe ?? "15min"));
+    const latest = candles[0];
+    const high = Number(latest?.high ?? 0);
+    const low = Number(latest?.low ?? 0);
+    const takeProfit = Number(signal.take_profit);
+    const stopLoss = Number(signal.stop_loss);
+    const direction = String(signal.direction).toUpperCase();
+    const outcome = direction === "BUY" ? (low <= stopLoss ? "LOSS" : high >= takeProfit ? "WIN" : null) : (high >= stopLoss ? "LOSS" : low <= takeProfit ? "WIN" : null);
+    if (!outcome) continue;
+    await supabaseUpdate("trade_signals", `id=eq.${encodeURIComponent(String(signal.id))}`, { status: "CLOSED", outcome, closed_at: new Date().toISOString() });
+    await sendTelegram(`TRADINGUARD AI OUTCOME\\nAsset: ${signal.asset}\\nOutcome: ${outcome}\\nDirection: ${direction}`);
+    if (outcome === "LOSS") {
+      const forensic = await analyzeLoss(signal, candles, rules);
+      const lesson = `${forensic.lesson ?? "Review the setup against the guardrails."} Guardrail: ${forensic.guardrail ?? "Require stronger rule alignment."}`;
+      await saveLesson(String(signal.asset).replace("/", ""), lesson);
+    }
+    closed += 1;
+  }
+  return { tracked: openSignals.length, closed };
+}
+
+export async function scanMarketCycle() {
+  const tracked = await trackOpenSignals();
+  const rules = await loadRules();
+  if (!rules.trim()) return { scanned: 0, signals: 0, ...tracked, skipped: "No strategy rules have been ingested" };
   let scanned = 0;
   let signals = 0;
   for (const asset of ASSETS) {
@@ -137,5 +177,5 @@ export async function scanMarketCycle() {
       }
     }
   }
-  return { scanned, signals };
+  return { scanned, signals, ...tracked };
 }
