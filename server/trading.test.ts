@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fetchMarketData, isTwelveDataQuotaError, normalizeTimeframe, parseTradeSignal } from "./trading";
+import { fetchMarketData, GROQ_MODEL, isTwelveDataQuotaError, normalizeTimeframe, parseTradeSignal } from "./trading";
 
 describe("parseTradeSignal", () => {
   it("parses a structured forex signal", () => {
@@ -36,6 +36,12 @@ describe("Twelve Data quota handling", () => {
   it("recognizes daily credit exhaustion messages", () => {
     expect(isTwelveDataQuotaError("You have run out of API credits for the day")).toBe(true);
     expect(isTwelveDataQuotaError("Invalid symbol")).toBe(false);
+  });
+});
+
+describe("Groq model configuration", () => {
+  it("uses an accessible JSON-capable model", () => {
+    expect(GROQ_MODEL).toBe("openai/gpt-oss-20b");
   });
 });
 

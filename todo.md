@@ -50,3 +50,4 @@
 - [ ] Evaluate MetaTrader 5 as a market-data source and define the required broker account, terminal, bridge, persistent host, and secret configuration.
 - [ ] Choose an MT5 hosting option: local computer for testing, MetaTrader virtual hosting, or a Windows VPS for an external 24/7 bridge.
 - [x] Fix Chat Audit interval normalization so 15MIN and equivalent timeframe variants are accepted by the market-data adapter.
+- [x] Fix Chat Audit Groq model access by switching to the accessible JSON-capable openai/gpt-oss-20b model.
