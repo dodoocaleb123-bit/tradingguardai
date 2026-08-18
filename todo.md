@@ -35,3 +35,5 @@
 - [ ] Diagnose why no Telegram trade signals have been received and verify scheduler, scanner, and Telegram dispatch behavior.
 - [x] Fix Twelve Data market symbol formatting by preserving required slash-formatted symbols such as EUR/USD and BTC/USD.
 - [ ] Verify a corrected deployed Heartbeat run reaches Twelve Data successfully and either generates a Telegram signal or records a valid no-setup result.
+- [ ] Diagnose why approved TradingGuardAI signals are still not reaching Telegram after the Twelve Data symbol fix.
+- [x] Replace rejected Groq model llama-3.1-8b-instant with the supported llama-3.3-70b-versatile model; live scanner completion verification remains pending.

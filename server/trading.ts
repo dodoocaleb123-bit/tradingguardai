@@ -70,7 +70,7 @@ async function groqCompletion(messages: Array<{ role: string; content: string }>
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY ?? ""}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model: "llama-3.1-8b-instant", temperature: 0.1, messages, response_format: { type: "json_object" } }),
+    body: JSON.stringify({ model: "llama-3.3-70b-versatile", temperature: 0.1, messages, response_format: { type: "json_object" } }),
   });
   const payload = await response.json() as { choices?: Array<{ message?: { content?: string } }>; error?: { message?: string } };
   if (!response.ok) throw new Error(payload.error?.message ?? "Groq request failed");
