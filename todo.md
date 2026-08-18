@@ -7,7 +7,7 @@
 - [x] Extract text from PDF and DOCX files server-side and append parsed rules to Supabase strategy_rules without overwriting existing records.
 - [x] Build persistent Strategy Rules page for adding and reviewing rules.
 - [x] Implement live Twelve Data OHLCV retrieval for EUR/USD, XAU/USD, GBP/USD, and BTC/USD on 15-minute and 1-hour timeframes.
-- [ ] Deploy the app and activate the five-minute Heartbeat schedule for /api/scheduled/market-scan; the handler and scan workflow are implemented.
+- [ ] Verify the deployed Heartbeat executes successfully for /api/scheduled/market-scan; the enabled job has been created.
 - [x] Implement rule-grounded LLM setup evaluation and structured signal generation with asset, timeframe, direction, entry, stop loss, take profit, risk/reward, and confidence.
 - [x] Implement Telegram dispatcher using the user-provided bot and chat configuration through secure server-side secrets.
 - [x] Build Chat Audit interface with free-form trade parsing and exact verdict labels TRADE APPROVED and TRADE DENIED.
@@ -25,8 +25,10 @@
 - [x] Fix Supabase migration foreign-key type mismatch by removing the signal_id foreign key and matching the existing lessons_learned schema.
 - [x] Align forensic-learning persistence with the existing lessons_learned columns: asset_pair, lesson_learned, embedding, and created_at; do not add a signal_id foreign key.
 - [x] Save a new publish-eligible checkpoint after the outcome-tracking, learning-loop, and append-flow fixes.
-- [ ] Activate and verify the deployed five-minute Heartbeat for market scanning and open-signal outcome tracking.
+- [ ] Verify the deployed five-minute Heartbeat for market scanning and open-signal outcome tracking; the job is enabled but has no recorded runs yet.
 - [x] Include lessons_learned context in future strategy audits and market scans.
 - [x] Add focused Vitest coverage for trackOpenSignals and the LOSS forensic path.
 - [x] Diagnose and fix reported failure when appending strategy rules to Supabase strategy_rules by removing unsupported file_name from the insert payload.
 - [x] Fix strategy_rules append payload again: the live table also lacks rule_text, so use only confirmed existing columns.
+- [x] Identify and fix the live strategy_rules schema mismatch: the confirmed rule text column is content, with optional embedding and created_at.
+- [x] Align strategy_rules ingestion to the confirmed columns: content, optional embedding, and created_at only.

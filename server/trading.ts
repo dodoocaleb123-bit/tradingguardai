@@ -109,8 +109,10 @@ export async function loadRules() {
   return [...rulesText, ...lessonsText].join("\n\n");
 }
 
-export async function saveRule(source: string, content: string, fileName?: string) {
-  return supabaseInsert("strategy_rules", { source, content, created_at: new Date().toISOString() });
+export async function saveRule(_source: string, content: string, _fileName?: string, embedding?: number[]) {
+  const row: Record<string, unknown> = { content, created_at: new Date().toISOString() };
+  if (embedding?.length) row.embedding = embedding;
+  return supabaseInsert("strategy_rules", row);
 }
 
 export async function saveLesson(assetPair: string, lesson: string, embedding?: number[]) {
