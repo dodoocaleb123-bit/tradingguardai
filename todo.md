@@ -1,0 +1,27 @@
+# Project TODO
+
+- [x] Configure required external integration secrets for Supabase, Twelve Data, Groq/Llama, and Telegram.
+- [x] Define Supabase-backed data model for strategy rules, ingested documents, audited trades, generated signals, trade outcomes, and lessons learned.
+- [ ] Apply supabase_schema.sql to Supabase and verify strategy_rules, audited_trades, trade_signals, and lessons_learned. strategy_rules and trade_signals are reachable; audited_trades and lessons_learned currently return 404.
+- [x] Build first-launch strategy onboarding with PDF, DOCX, and plain-text inputs.
+- [x] Extract text from PDF and DOCX files server-side and append parsed rules to Supabase strategy_rules without overwriting existing records.
+- [x] Build persistent Strategy Rules page for adding and reviewing rules.
+- [x] Implement live Twelve Data OHLCV retrieval for EUR/USD, XAU/USD, GBP/USD, and BTC/USD on 15-minute and 1-hour timeframes.
+- [ ] Deploy the app and activate the five-minute Heartbeat schedule for /api/scheduled/market-scan; the handler and scan workflow are implemented.
+- [x] Implement rule-grounded LLM setup evaluation and structured signal generation with asset, timeframe, direction, entry, stop loss, take profit, risk/reward, and confidence.
+- [x] Implement Telegram dispatcher using the user-provided bot and chat configuration through secure server-side secrets.
+- [x] Build Chat Audit interface with free-form trade parsing and exact verdict labels TRADE APPROVED and TRADE DENIED.
+- [x] Persist every audited signal and review in Supabase, including timestamp, confidence, and adjustments.
+- [ ] Implement active-signal outcome tracking and outcome cron worker with exact WIN and LOSS labels.
+- [ ] Implement post-loss forensic analysis and lesson-writing worker and append lessons learned to the strategy memory.
+- [x] Build Trade History page for audited trades, generated signals, timestamps, verdicts, and outcomes.
+- [x] Build exactly four sidebar pages: Onboarding, Chat Audit, Trade History, and Strategy Rules.
+- [x] Apply a professional dark theme with mobile-first and laptop-responsive layouts.
+- [x] Add loading, empty, error, and success states for all major user flows.
+- [x] Write Vitest coverage for parsing, verdict labels, signal validation, persistence helpers, and core router procedures.
+- [x] Run type checks, tests, and build verification.
+- [x] Capture desktop and mobile screenshots for visual verification.
+- [ ] Review this checklist and mark all completed items before saving the final checkpoint.
+- [x] Fix Supabase migration foreign-key type mismatch by removing the signal_id foreign key and matching the existing lessons_learned schema.
+- [x] Align forensic-learning persistence with the existing lessons_learned columns: asset_pair, lesson_learned, embedding, and created_at; do not add a signal_id foreign key.
+- [ ] Resolve inactive Publish button by saving a current publish-eligible project checkpoint after validation.

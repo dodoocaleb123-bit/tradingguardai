@@ -5,17 +5,13 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import DashboardLayout from "./components/DashboardLayout";
+import ChatAudit from "./pages/ChatAudit";
+import TradeHistory from "./pages/TradeHistory";
+import StrategyRules from "./pages/StrategyRules";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
-  return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
-  );
+  return <DashboardLayout><Switch><Route path="/" component={Home} /><Route path="/chat-audit" component={ChatAudit} /><Route path="/trade-history" component={TradeHistory} /><Route path="/strategy-rules" component={StrategyRules} /><Route path="/404" component={NotFound} /><Route component={NotFound} /></Switch></DashboardLayout>;
 }
 
 // NOTE: About Theme
@@ -27,7 +23,7 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider
-        defaultTheme="light"
+        defaultTheme="dark"
         // switchable
       >
         <TooltipProvider>

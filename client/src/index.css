@@ -79,9 +79,9 @@
 }
 
 .dark {
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-blue-50);
-  --sidebar-primary: var(--color-blue-500);
+  --primary: oklch(0.82 0.14 196);
+  --primary-foreground: oklch(0.16 0.03 220);
+  --sidebar-primary: oklch(0.82 0.14 196);
   --sidebar-primary-foreground: var(--color-blue-50);
   --background: oklch(0.141 0.005 285.823);
   --foreground: oklch(0.85 0.005 65);
@@ -99,7 +99,7 @@
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.488 0.243 264.376);
+  --ring: oklch(0.82 0.14 196);
   --chart-1: var(--color-blue-300);
   --chart-2: var(--color-blue-500);
   --chart-3: var(--color-blue-600);
@@ -119,6 +119,8 @@
   }
   body {
     @apply bg-background text-foreground;
+    min-height: 100vh;
+    background-image: radial-gradient(circle at 80% -10%, oklch(0.28 0.08 205 / 18%), transparent 34rem);
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
