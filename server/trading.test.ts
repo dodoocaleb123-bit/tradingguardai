@@ -1,10 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
-import { fetchMarketData, isTwelveDataQuotaError, parseTradeSignal } from "./trading";
+import { fetchMarketData, isTwelveDataQuotaError, normalizeTimeframe, parseTradeSignal } from "./trading";
 
 describe("parseTradeSignal", () => {
   it("parses a structured forex signal", () => {
     const result = parseTradeSignal("Asset: EUR/USD\nTimeframe: 15MIN\nDirection: SELL\nEntry: 1.15789\nStop Loss: 1.1582\nTake Profit: 1.1573\nRisk/Reward: 1:2");
-    expect(result).toMatchObject({ asset: "EUR/USD", timeframe: "15MIN", direction: "SELL", entry: 1.15789, stopLoss: 1.1582, takeProfit: 1.1573, riskReward: "1:2" });
+    expect(result).toMatchObject({ asset: "EUR/USD", timeframe: "15min", direction: "SELL", entry: 1.15789, stopLoss: 1.1582, takeProfit: 1.1573, riskReward: "1:2" });
+  });
+
+  it("normalizes uppercase and shorthand timeframes", () => {
+    expect(normalizeTimeframe("15MIN")).toBe("15min");
+    expect(normalizeTimeframe("1HOUR")).toBe("1h");
+    expect(parseTradeSignal("Asset: BTC/USD Timeframe: 15MIN Direction: SELL")).toMatchObject({ timeframe: "15min" });
   });
 
   it("normalizes compact crypto symbols", () => {
@@ -20,8 +26,9 @@ describe("Twelve Data market symbols", () => {
   it("keeps slash-formatted symbols in the request", async () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ values: [{ close: "1.1" }] }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
-    await fetchMarketData("EUR/USD", "15min");
+    await fetchMarketData("EUR/USD", "15MIN");
     expect(String(fetchMock.mock.calls[0]?.[0])).toContain("symbol=EUR%2FUSD");
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("interval=15min");
   });
 });
 

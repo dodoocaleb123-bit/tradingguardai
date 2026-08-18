@@ -39,3 +39,14 @@
 - [ ] Verify the deployed scanner completes a Groq call using the supported llama-3.3-70b-versatile model.
 - [ ] Verify the deployed five-minute scanner avoids timeout after evaluating the eight asset/timeframe combinations in parallel.
 - [ ] Persist Twelve Data quota-block state across scheduled runs or instances and stop remaining market requests after the first quota response.
+- [x] Resolve the Management UI state that keeps Publish latest version inactive after preview synchronization: auto-publish is enabled, so the current checkpoint is published automatically and the manual button is intentionally inactive.
+- [x] Recheck current live approved-signal delivery after the Twelve Data quota-handling checkpoint: the deployed scanner is correctly pausing because Twelve Data daily credits remain exhausted; no Telegram dispatch is attempted.
+- [x] Recheck Telegram signal delivery after the user may have replaced the Twelve Data API key: the deployed logs still show Twelve Data daily quota exhaustion, so setup evaluation and Telegram dispatch are never reached.
+- [ ] Verify the updated TWELVE_DATA_API_KEY is active in the deployed scanner and no longer returns the exhausted-quota response.
+- [x] Evaluate budget-friendly market-data replacements: OANDA practice API is the strongest forex/gold candidate, while Coinbase/Kraken-style exchange feeds are suitable for BTC; no single fully free provider was confirmed for all four assets at the required volume.
+- [ ] Plan OANDA practice API integration for EUR/USD, GBP/USD, and XAU/USD plus Coinbase candle integration for BTC/USD.
+- [ ] Add and validate OANDA and Coinbase server-side credentials before switching the scanner providers.
+- [ ] Provide a fallback market-data path because the OANDA practice-account signup page is currently unavailable.
+- [ ] Evaluate MetaTrader 5 as a market-data source and define the required broker account, terminal, bridge, persistent host, and secret configuration.
+- [ ] Choose an MT5 hosting option: local computer for testing, MetaTrader virtual hosting, or a Windows VPS for an external 24/7 bridge.
+- [x] Fix Chat Audit interval normalization so 15MIN and equivalent timeframe variants are accepted by the market-data adapter.

@@ -5,6 +5,44 @@ import { supabaseInsert, supabaseSelect, supabaseUpdate } from "./supabase";
 export const ASSETS = ["EUR/USD", "XAU/USD", "GBP/USD", "BTC/USD"] as const;
 export const TIMEFRAMES = ["15min", "1h"] as const;
 
+export function normalizeTimeframe(value: string) {
+  const normalized = value.trim().toLowerCase().replace(/\s+/g, "");
+  const aliases: Record<string, string> = {
+    "1m": "1min",
+    "1min": "1min",
+    "1minute": "1min",
+    "5m": "5min",
+    "5min": "5min",
+    "5minute": "5min",
+    "15m": "15min",
+    "15min": "15min",
+    "15minute": "15min",
+    "30m": "30min",
+    "30min": "30min",
+    "30minute": "30min",
+    "45m": "45min",
+    "45min": "45min",
+    "45minute": "45min",
+    "1h": "1h",
+    "1hr": "1h",
+    "1hour": "1h",
+    "2h": "2h",
+    "2hr": "2h",
+    "2hour": "2h",
+    "4h": "4h",
+    "4hr": "4h",
+    "4hour": "4h",
+    "8h": "8h",
+    "8hr": "8h",
+    "8hour": "8h",
+    "1d": "1day",
+    "1day": "1day",
+  };
+  const result = aliases[normalized];
+  if (!result) throw new Error(`Invalid interval provided: ${value}`);
+  return result;
+}
+
 export type ParsedSignal = {
   asset: string;
   timeframe?: string;
@@ -49,7 +87,7 @@ export function parseTradeSignal(input: string): ParsedSignal {
   };
   return {
     asset: asset.replace(/\s/g, "").replace("XAUUSD", "XAU/USD").replace("BTCUSD", "BTC/USD"),
-    timeframe: find([/timeframe\s*:\s*([\w]+)/i]),
+    timeframe: (() => { const value = find([/timeframe\s*:\s*([\w]+)/i]); return value ? normalizeTimeframe(value) : undefined; })(),
     direction,
     entry: numberAfter("entry"),
     stopLoss: numberAfter("stop\\s*loss|sl"),
@@ -71,11 +109,12 @@ function nextUtcDayMs() {
 }
 
 export async function fetchMarketData(asset: string, interval: string) {
+  const normalizedInterval = normalizeTimeframe(interval);
   if (Date.now() < marketDataQuotaBlockedUntil) {
     throw new Error("Twelve Data daily quota is exhausted; scanner paused until the next UTC day");
   }
   const symbol = asset;
-  const response = await fetch(`https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=${interval}&outputsize=30&apikey=${encodeURIComponent(process.env.TWELVE_DATA_API_KEY ?? "")}`);
+  const response = await fetch(`https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=${normalizedInterval}&outputsize=30&apikey=${encodeURIComponent(process.env.TWELVE_DATA_API_KEY ?? "")}`);
   const payload = await response.json() as { values?: Array<Record<string, string>>; message?: string };
   const message = payload.message ?? "Market data unavailable";
   if (isTwelveDataQuotaError(message)) {
