@@ -110,7 +110,7 @@ export async function loadRules() {
 }
 
 export async function saveRule(source: string, content: string, fileName?: string) {
-  return supabaseInsert("strategy_rules", { source, content, rule_text: content, created_at: new Date().toISOString() });
+  return supabaseInsert("strategy_rules", { source, content, created_at: new Date().toISOString() });
 }
 
 export async function saveLesson(assetPair: string, lesson: string, embedding?: number[]) {

@@ -24,8 +24,9 @@
 - [ ] Review this checklist and mark all completed items before saving the final checkpoint.
 - [x] Fix Supabase migration foreign-key type mismatch by removing the signal_id foreign key and matching the existing lessons_learned schema.
 - [x] Align forensic-learning persistence with the existing lessons_learned columns: asset_pair, lesson_learned, embedding, and created_at; do not add a signal_id foreign key.
-- [ ] Save a new publish-eligible checkpoint after the outcome-tracking, learning-loop, and append-flow fixes.
+- [x] Save a new publish-eligible checkpoint after the outcome-tracking, learning-loop, and append-flow fixes.
 - [ ] Activate and verify the deployed five-minute Heartbeat for market scanning and open-signal outcome tracking.
 - [x] Include lessons_learned context in future strategy audits and market scans.
 - [x] Add focused Vitest coverage for trackOpenSignals and the LOSS forensic path.
 - [x] Diagnose and fix reported failure when appending strategy rules to Supabase strategy_rules by removing unsupported file_name from the insert payload.
+- [x] Fix strategy_rules append payload again: the live table also lacks rule_text, so use only confirmed existing columns.
