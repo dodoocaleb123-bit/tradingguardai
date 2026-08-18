@@ -161,23 +161,20 @@ export async function scanMarketCycle() {
   const tracked = await trackOpenSignals();
   const rules = await loadRules();
   if (!rules.trim()) return { scanned: 0, signals: 0, ...tracked, skipped: "No strategy rules have been ingested" };
-  let scanned = 0;
-  let signals = 0;
-  for (const asset of ASSETS) {
-    for (const timeframe of TIMEFRAMES) {
-      scanned += 1;
-      try {
-        const market = await fetchMarketData(asset, timeframe);
-        const setup = await generateSetup(asset, timeframe, market, rules);
-        if (!setup.setup) continue;
-        const row = { asset, timeframe, direction: setup.direction, entry: Number(setup.entry), stop_loss: Number(setup.stopLoss), take_profit: Number(setup.takeProfit), risk_reward: String(setup.riskReward ?? "1:2"), confidence: Number(setup.confidence ?? 0), rationale: setup.rationale ?? "", status: "OPEN", outcome: null, created_at: new Date().toISOString() };
-        await supabaseInsert("trade_signals", row);
-        await sendTelegram(["TRADINGUARD AI SIGNAL", `Asset: ${asset}`, `Timeframe: ${timeframe.toUpperCase()}`, `Direction: ${row.direction}`, `Entry: ${row.entry}`, `Stop Loss: ${row.stop_loss}`, `Take Profit: ${row.take_profit}`, `Risk/Reward: ${row.risk_reward}`, `Confidence level: ${row.confidence}%`].join("\\n"));
-        signals += 1;
-      } catch (error) {
-        console.error(`[Scanner] ${asset} ${timeframe} failed`, error);
-      }
+  const evaluations = ASSETS.flatMap(asset => TIMEFRAMES.map(timeframe => ({ asset, timeframe })));
+  const results = await Promise.all(evaluations.map(async ({ asset, timeframe }) => {
+    try {
+      const market = await fetchMarketData(asset, timeframe);
+      const setup = await generateSetup(asset, timeframe, market, rules);
+      if (!setup.setup) return 0;
+      const row = { asset, timeframe, direction: setup.direction, entry: Number(setup.entry), stop_loss: Number(setup.stopLoss), take_profit: Number(setup.takeProfit), risk_reward: String(setup.riskReward ?? "1:2"), confidence: Number(setup.confidence ?? 0), rationale: setup.rationale ?? "", status: "OPEN", outcome: null, created_at: new Date().toISOString() };
+      await supabaseInsert("trade_signals", row);
+      await sendTelegram(["TRADINGGUARD AI SIGNAL", `Asset: ${asset}`, `Timeframe: ${timeframe.toUpperCase()}`, `Direction: ${row.direction}`, `Entry: ${row.entry}`, `Stop Loss: ${row.stop_loss}`, `Take Profit: ${row.take_profit}`, `Risk/Reward: ${row.risk_reward}`, `Confidence level: ${row.confidence}%`].join("\\n"));
+      return 1;
+    } catch (error) {
+      console.error(`[Scanner] ${asset} ${timeframe} failed`, error);
+      return 0;
     }
-  }
-  return { scanned, signals, ...tracked };
+  }));
+  return { scanned: evaluations.length, signals: results.reduce<number>((total, value) => total + value, 0), ...tracked };
 }

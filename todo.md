@@ -37,3 +37,4 @@
 - [ ] Verify a corrected deployed Heartbeat run reaches Twelve Data successfully and either generates a Telegram signal or records a valid no-setup result.
 - [ ] Diagnose why approved TradingGuardAI signals are still not reaching Telegram after the Twelve Data symbol fix.
 - [x] Replace rejected Groq model llama-3.1-8b-instant with the supported llama-3.3-70b-versatile model; live scanner completion verification remains pending.
+- [x] Prevent the five-minute scanner from timing out by evaluating the eight asset/timeframe combinations in parallel after Groq model access is restored.
