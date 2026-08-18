@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { parseTradeSignal } from "./trading";
+import { describe, expect, it, vi } from "vitest";
+import { fetchMarketData, parseTradeSignal } from "./trading";
 
 describe("parseTradeSignal", () => {
   it("parses a structured forex signal", () => {
@@ -13,6 +13,15 @@ describe("parseTradeSignal", () => {
 
   it("rejects incomplete ideas without asset or direction", () => {
     expect(() => parseTradeSignal("Entry: 1.2 Stop Loss: 1.1")).toThrow();
+  });
+});
+
+describe("Twelve Data market symbols", () => {
+  it("keeps slash-formatted symbols in the request", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ values: [{ close: "1.1" }] }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    await fetchMarketData("EUR/USD", "15min");
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("symbol=EUR%2FUSD");
   });
 });
 

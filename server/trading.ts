@@ -59,7 +59,7 @@ export function parseTradeSignal(input: string): ParsedSignal {
 }
 
 export async function fetchMarketData(asset: string, interval: string) {
-  const symbol = asset.replace("/", "");
+  const symbol = asset;
   const response = await fetch(`https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=${interval}&outputsize=30&apikey=${encodeURIComponent(process.env.TWELVE_DATA_API_KEY ?? "")}`);
   const payload = await response.json() as { values?: Array<Record<string, string>>; message?: string };
   if (!response.ok || !payload.values) throw new Error(payload.message ?? "Market data unavailable");

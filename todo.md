@@ -32,3 +32,6 @@
 - [x] Fix strategy_rules append payload again: the live table also lacks rule_text, so use only confirmed existing columns.
 - [x] Identify and fix the live strategy_rules schema mismatch: the confirmed rule text column is content, with optional embedding and created_at.
 - [x] Align strategy_rules ingestion to the confirmed columns: content, optional embedding, and created_at only.
+- [ ] Diagnose why no Telegram trade signals have been received and verify scheduler, scanner, and Telegram dispatch behavior.
+- [x] Fix Twelve Data market symbol formatting by preserving required slash-formatted symbols such as EUR/USD and BTC/USD.
+- [ ] Verify a corrected deployed Heartbeat run reaches Twelve Data successfully and either generates a Telegram signal or records a valid no-setup result.
