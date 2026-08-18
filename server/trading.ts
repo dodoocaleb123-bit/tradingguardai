@@ -58,11 +58,31 @@ export function parseTradeSignal(input: string): ParsedSignal {
   };
 }
 
+let marketDataQuotaBlockedUntil = 0;
+
+export function isTwelveDataQuotaError(message: string) {
+  return /run out of api credits|credits for the day|daily limit/i.test(message);
+}
+
+function nextUtcDayMs() {
+  const next = new Date();
+  next.setUTCHours(24, 0, 0, 0);
+  return next.getTime();
+}
+
 export async function fetchMarketData(asset: string, interval: string) {
+  if (Date.now() < marketDataQuotaBlockedUntil) {
+    throw new Error("Twelve Data daily quota is exhausted; scanner paused until the next UTC day");
+  }
   const symbol = asset;
   const response = await fetch(`https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=${interval}&outputsize=30&apikey=${encodeURIComponent(process.env.TWELVE_DATA_API_KEY ?? "")}`);
   const payload = await response.json() as { values?: Array<Record<string, string>>; message?: string };
-  if (!response.ok || !payload.values) throw new Error(payload.message ?? "Market data unavailable");
+  const message = payload.message ?? "Market data unavailable";
+  if (isTwelveDataQuotaError(message)) {
+    marketDataQuotaBlockedUntil = nextUtcDayMs();
+    throw new Error(`Twelve Data daily quota is exhausted; scanner paused until the next UTC day (${message})`);
+  }
+  if (!response.ok || !payload.values) throw new Error(message);
   return payload.values;
 }
 
@@ -176,5 +196,6 @@ export async function scanMarketCycle() {
       return 0;
     }
   }));
-  return { scanned: evaluations.length, signals: results.reduce<number>((total, value) => total + value, 0), ...tracked };
+  const quotaBlocked = results.length > 0 && results.every(value => value === 0) && Date.now() < marketDataQuotaBlockedUntil;
+  return { scanned: evaluations.length, signals: results.reduce<number>((total, value) => total + value, 0), ...tracked, ...(quotaBlocked ? { skipped: "Twelve Data daily quota exhausted; retrying after the next UTC day" } : {}) };
 }

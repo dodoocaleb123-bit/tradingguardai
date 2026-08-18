@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fetchMarketData, parseTradeSignal } from "./trading";
+import { fetchMarketData, isTwelveDataQuotaError, parseTradeSignal } from "./trading";
 
 describe("parseTradeSignal", () => {
   it("parses a structured forex signal", () => {
@@ -22,6 +22,13 @@ describe("Twelve Data market symbols", () => {
     vi.stubGlobal("fetch", fetchMock);
     await fetchMarketData("EUR/USD", "15min");
     expect(String(fetchMock.mock.calls[0]?.[0])).toContain("symbol=EUR%2FUSD");
+  });
+});
+
+describe("Twelve Data quota handling", () => {
+  it("recognizes daily credit exhaustion messages", () => {
+    expect(isTwelveDataQuotaError("You have run out of API credits for the day")).toBe(true);
+    expect(isTwelveDataQuotaError("Invalid symbol")).toBe(false);
   });
 });
 

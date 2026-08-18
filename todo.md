@@ -7,7 +7,7 @@
 - [x] Extract text from PDF and DOCX files server-side and append parsed rules to Supabase strategy_rules without overwriting existing records.
 - [x] Build persistent Strategy Rules page for adding and reviewing rules.
 - [x] Implement live Twelve Data OHLCV retrieval for EUR/USD, XAU/USD, GBP/USD, and BTC/USD on 15-minute and 1-hour timeframes.
-- [ ] Verify the deployed Heartbeat executes successfully for /api/scheduled/market-scan; the enabled job has been created.
+- [x] Confirm the deployed Heartbeat executes for /api/scheduled/market-scan; it has run, including one successful HTTP 200 response and one timeout during the old scanner path.
 - [x] Implement rule-grounded LLM setup evaluation and structured signal generation with asset, timeframe, direction, entry, stop loss, take profit, risk/reward, and confidence.
 - [x] Implement Telegram dispatcher using the user-provided bot and chat configuration through secure server-side secrets.
 - [x] Build Chat Audit interface with free-form trade parsing and exact verdict labels TRADE APPROVED and TRADE DENIED.
@@ -32,9 +32,10 @@
 - [x] Fix strategy_rules append payload again: the live table also lacks rule_text, so use only confirmed existing columns.
 - [x] Identify and fix the live strategy_rules schema mismatch: the confirmed rule text column is content, with optional embedding and created_at.
 - [x] Align strategy_rules ingestion to the confirmed columns: content, optional embedding, and created_at only.
-- [ ] Diagnose why no Telegram trade signals have been received and verify scheduler, scanner, and Telegram dispatch behavior.
+- [x] Diagnose why no Telegram trade signals were received: the old Groq model was rejected, then the corrected run exhausted Twelve Data’s daily 800-credit quota before signal generation.
 - [x] Fix Twelve Data market symbol formatting by preserving required slash-formatted symbols such as EUR/USD and BTC/USD.
-- [ ] Verify a corrected deployed Heartbeat run reaches Twelve Data successfully and either generates a Telegram signal or records a valid no-setup result.
-- [ ] Diagnose why approved TradingGuardAI signals are still not reaching Telegram after the Twelve Data symbol fix.
-- [x] Replace rejected Groq model llama-3.1-8b-instant with the supported llama-3.3-70b-versatile model; live scanner completion verification remains pending.
-- [x] Prevent the five-minute scanner from timing out by evaluating the eight asset/timeframe combinations in parallel after Groq model access is restored.
+- [ ] Verify a corrected deployed Heartbeat run reaches Twelve Data successfully after the Twelve Data quota resets, and either generates a Telegram signal or records a valid no-setup result.
+- [x] Diagnose why approved TradingGuardAI signals were not reaching Telegram: the scanner never completed setup evaluation because Groq/model and then Twelve Data quota failures occurred first.
+- [ ] Verify the deployed scanner completes a Groq call using the supported llama-3.3-70b-versatile model.
+- [ ] Verify the deployed five-minute scanner avoids timeout after evaluating the eight asset/timeframe combinations in parallel.
+- [ ] Persist Twelve Data quota-block state across scheduled runs or instances and stop remaining market requests after the first quota response.

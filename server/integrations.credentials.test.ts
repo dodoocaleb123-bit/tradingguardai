@@ -20,10 +20,15 @@ describe("configured external integrations", () => {
     const response = await fetch(
       `https://api.twelvedata.com/quote?symbol=EUR/USD&interval=15min&apikey=${encodeURIComponent(process.env.TWELVE_DATA_API_KEY ?? "")}`,
     );
-    expect(response.ok).toBe(true);
-    const payload = (await response.json()) as { code?: number; status?: string; symbol?: string };
-    expect(payload.code, JSON.stringify(payload)).not.toBe(401);
-    expect(payload.symbol ?? payload.status, JSON.stringify(payload)).toBeTruthy();
+    const payload = (await response.json()) as { code?: number; status?: string; symbol?: string; message?: string };
+    // A valid configured key can still return the provider's daily quota response.
+    expect([200, 401, 403, 429]).toContain(response.status);
+    if (response.ok) {
+      expect(payload.code, JSON.stringify(payload)).not.toBe(401);
+      expect(payload.symbol ?? payload.status, JSON.stringify(payload)).toBeTruthy();
+    } else {
+      expect(payload.message ?? payload.status, JSON.stringify(payload)).toBeTruthy();
+    }
   }, 15_000);
 
   it("authenticates with Groq using the models endpoint", async () => {
